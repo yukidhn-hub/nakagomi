@@ -1,258 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="高校1年生向け 情報I ネットワーク・プロトコル学習Webアプリ">
-  <title>ネットワーク探検隊｜プロトコルとTCP/IP</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ネットワーク探検隊｜通信を動かして学ぼう</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="hero">
-    <nav class="topbar">
-      <div class="logo">🌐 ネットワーク探検隊</div>
-      <div class="progress-wrap">
-        <span id="progressText">学習 0%</span>
-        <div class="progress"><div id="progressBar"></div></div>
-      </div>
-    </nav>
-    <div class="hero-content">
-      <span class="badge">情報Ⅰ・ネットワーク入門</span>
-      <h1>コンピューターは<br><strong>どうやって会話する？</strong></h1>
-      <p>「プロトコル」と「階層」を、郵便のしくみにたとえて楽しく理解しよう。</p>
-      <button class="primary-btn" id="startBtn">探検をはじめる ↓</button>
+<header class="hero">
+  <div class="topbar"><div class="logo">🌐 ネットワーク探検隊</div><div class="lesson">情報Ⅰ｜ネットワーク入門</div></div>
+  <div class="hero-inner">
+    <span class="badge">操作して理解する</span>
+    <h1>「こんにちは」が<br><em>どうやって届く？</em></h1>
+    <p>Webページを送る実験をしながら、プロトコル・4階層・カプセル化を体験しよう。</p>
+    <button class="start" id="start">実験をはじめる ↓</button>
+  </div>
+</header>
+
+<main id="app">
+<section class="section" id="experiment">
+  <div class="heading"><span>STEP 1</span><h2>まず、何を送りたい？</h2><p>目的によって使うプロトコルも変わります。</p></div>
+  <div class="choice-grid">
+    <button class="choice selected" data-app="web"><b>🌍 Webページ</b><small>「学校のサイトを見たい」</small><strong>HTTP / HTTPS</strong></button>
+    <button class="choice" data-app="mail"><b>✉️ メール</b><small>「友だちにメールを送りたい」</small><strong>SMTP / POP3</strong></button>
+  </div>
+  <div class="hint">💡 プロトコルは「通信するときの共通ルール」。目的に合ったルールを使います。</div>
+</section>
+
+<section class="section">
+  <div class="heading"><span>STEP 2</span><h2>データを4階層にバトンタッチ</h2><p>下の階層を<strong>上から順にクリック</strong>して、仕事を体験してみよう。</p></div>
+  <div class="layer-game">
+    <div class="layer-stack">
+      <button class="layer active" data-layer="4"><i>4</i><div><b>アプリケーション層</b><small id="layer4">Webの「リクエスト」を作る</small></div><mark>HTTP</mark></button>
+      <button class="layer" data-layer="3"><i>3</i><div><b>トランスポート層</b><small>TCP / UDPで届け方を決める</small></div><mark>TCP</mark></button>
+      <button class="layer" data-layer="2"><i>2</i><div><b>インターネット層</b><small>IPアドレスで宛先への道を決める</small></div><mark>IP</mark></button>
+      <button class="layer" data-layer="1"><i>1</i><div><b>ネットワークインターフェース層</b><small>電波・電気信号にして送る</small></div><mark>Wi-Fi</mark></button>
     </div>
-    <div class="floating-node node1">📱</div>
-    <div class="floating-node node2">💻</div>
-    <div class="floating-node node3">☁️</div>
-  </header>
+    <div class="workbench" id="workbench">
+      <div class="work-icon">👆</div><h3>4階層をクリック！</h3><p>その階層が何をしているか、右側で実験できます。</p>
+    </div>
+  </div>
+</section>
 
-  <main>
-    <section class="section intro" id="start">
-      <div class="section-title">
-        <span class="eyebrow">01 / WHAT IS A PROTOCOL?</span>
-        <h2>プロトコルって何？</h2>
-      </div>
-      <div class="definition-card">
-        <div class="definition-icon">🤝</div>
-        <div>
-          <h3>コンピューター同士の「共通ルール」</h3>
-          <p>プロトコルとは、コンピューター同士がスムーズに通信するための<strong>共通のルール（約束事）</strong>です。</p>
-          <p class="small-note">たとえば、日本語を話す人同士なら会話がしやすいのと同じ。世界中の機器が同じルールを使うから、メーカーが違っても通信できます。</p>
-        </div>
-      </div>
-    </section>
+<section class="section packet-section">
+  <div class="heading"><span>STEP 3</span><h2>カプセル化を体験</h2><p>「送り状」が1枚ずつ追加される様子を見てみよう。</p></div>
+  <div class="packet-lab">
+    <div class="phone">📱<b>あなた</b></div>
+    <div class="wire"><div class="moving-packet" id="movingPacket">DATA</div><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+    <div class="server">🖥️<b>サーバー</b></div>
+  </div>
+  <div class="controls"><button class="primary" id="encap">📦 1枚追加する</button><button class="secondary" id="send">🚀 送信する</button><button class="ghost" id="reset">↺ 最初から</button></div>
+  <div class="capsule" id="capsule"></div>
+  <p class="status" id="status">アプリケーションデータができました。「1枚追加する」を押してみよう。</p>
+</section>
 
-    <section class="section layers-section">
-      <div class="section-title">
-        <span class="eyebrow">02 / LAYERS</span>
-        <h2>なぜ「階層」に分けるの？</h2>
-      </div>
-      <div class="layer-reasons">
-        <div class="reason-card">
-          <span>🧩</span>
-          <h3>仕事を分担できる</h3>
-          <p>各階層が自分の役割に集中。ほかの階層の細かい仕組みを知らなくてもOK。</p>
-        </div>
-        <div class="reason-card">
-          <span>🔧</span>
-          <h3>トラブルを見つけやすい</h3>
-          <p>通信がおかしいとき、「どの階層が原因？」と切り分けやすくなります。</p>
-        </div>
-        <div class="reason-card">
-          <span>📦</span>
-          <h3>バケツリレー方式</h3>
-          <p>データを上から下へ、役割ごとにバトンタッチして送ります。</p>
-        </div>
-      </div>
-    </section>
+<section class="section tcp-section">
+  <div class="heading"><span>STEP 4</span><h2>TCPとUDPを選んでみよう</h2><p>どちらもトランスポート層のプロトコル。でも「大事にするもの」が違います。</p></div>
+  <div class="toggle">
+    <button class="proto active" data-proto="tcp">🛡️ TCP</button>
+    <button class="proto" data-proto="udp">⚡ UDP</button>
+  </div>
+  <div class="tcp-demo" id="tcpDemo">
+    <div class="meter"><span>信頼性</span><div><b id="reliability"></b></div></div>
+    <div class="meter"><span>速さ</span><div><b id="speed"></b></div></div>
+    <div class="delivery" id="delivery"></div>
+    <p id="protoText"></p>
+  </div>
+</section>
 
-    <section class="section model-section">
-      <div class="section-title">
-        <span class="eyebrow">03 / TCP/IP MODEL</span>
-        <h2>TCP/IPの4階層を探検</h2>
-        <p>カードをクリックすると、その階層の役割が詳しく見られます。</p>
-      </div>
+<section class="section route-section">
+  <div class="heading"><span>STEP 5</span><h2>IPアドレスは「住所」</h2><p>ルーターは、宛先IPを見ながら次に進む道を選びます。</p></div>
+  <div class="route-map">
+    <div class="device selected-device">📱<small>送信元</small><b>192.168.1.10</b></div>
+    <div class="router">📡<small>ルーター</small><b>次の道を選ぶ</b></div>
+    <div class="router">📡<small>ルーター</small><b>次の道を選ぶ</b></div>
+    <div class="device target-device">🖥️<small>目的地</small><b>203.0.113.20</b></div>
+  </div>
+  <button class="primary" id="routeBtn">🧭 IPパケットを進める</button>
+  <p class="status" id="routeStatus">スタート地点です。ボタンを押すとIPパケットが移動します。</p>
+</section>
 
-      <div class="layers" id="layers">
-        <button class="layer-card app" data-layer="4">
-          <div class="layer-number">4</div>
-          <div class="layer-main">
-            <span class="layer-tag">APPLICATION</span>
-            <h3>アプリケーション層</h3>
-            <p>ブラウザやメールなど、アプリに合わせた通信ルール</p>
-          </div>
-          <div class="layer-protocols">
-            <span>HTTP/HTTPS</span><span>DNS</span><span>SMTP/POP3</span>
-          </div>
-          <span class="arrow">→</span>
-        </button>
-
-        <button class="layer-card transport" data-layer="3">
-          <div class="layer-number">3</div>
-          <div class="layer-main">
-            <span class="layer-tag">TRANSPORT</span>
-            <h3>トランスポート層</h3>
-            <p>データを確実・効率的に届けるための調整</p>
-          </div>
-          <div class="layer-protocols">
-            <span>TCP</span><span>UDP</span>
-          </div>
-          <span class="arrow">→</span>
-        </button>
-
-        <button class="layer-card internet" data-layer="2">
-          <div class="layer-number">2</div>
-          <div class="layer-main">
-            <span class="layer-tag">INTERNET</span>
-            <h3>インターネット層</h3>
-            <p>IPアドレスを使って目的地までの道筋を決める</p>
-          </div>
-          <div class="layer-protocols">
-            <span>IP</span><span>ICMP</span>
-          </div>
-          <span class="arrow">→</span>
-        </button>
-
-        <button class="layer-card network" data-layer="1">
-          <div class="layer-number">1</div>
-          <div class="layer-main">
-            <span class="layer-tag">NETWORK INTERFACE</span>
-            <h3>ネットワークインターフェース層</h3>
-            <p>電気信号や電波にして、隣の機器へ送る</p>
-          </div>
-          <div class="layer-protocols">
-            <span>Ethernet</span><span>Wi-Fi</span>
-          </div>
-          <span class="arrow">→</span>
-        </button>
-      </div>
-
-      <div class="layer-detail" id="layerDetail">
-        <div class="detail-placeholder">
-          <span>👆</span>
-          <p>上のカードをクリックして、階層の役割を見てみよう！</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section compare-section">
-      <div class="section-title">
-        <span class="eyebrow">04 / TWO MODELS</span>
-        <h2>OSIとTCP/IP、何が違う？</h2>
-      </div>
-      <div class="model-compare">
-        <div class="model-box">
-          <div class="model-icon">🏗️</div>
-          <h3>OSI参照モデル</h3>
-          <div class="big-number">7</div>
-          <p>理論的に通信の役割を細かく分けた<strong>7階層</strong>のモデル。</p>
-          <span class="model-label">学習・設計の基準として活用</span>
-        </div>
-        <div class="vs">VS</div>
-        <div class="model-box highlight">
-          <div class="model-icon">🌍</div>
-          <h3>TCP/IPモデル</h3>
-          <div class="big-number">4</div>
-          <p>実際のインターネット通信で使われる考え方をまとめた<strong>4階層</strong>のモデル。</p>
-          <span class="model-label">今回はこちらを中心に学習</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="section encapsulation-section">
-      <div class="section-title">
-        <span class="eyebrow">05 / ENCAPSULATION</span>
-        <h2>Webページを見るとき、データはどう動く？</h2>
-        <p>「カプセル化」と「非カプセル化」をアニメーションで体験しよう。</p>
-      </div>
-
-      <div class="simulation">
-        <div class="device">
-          <div class="device-icon">📱</div>
-          <strong>あなたのスマホ</strong>
-          <small>Webページを見たい！</small>
-        </div>
-
-        <div class="route">
-          <div class="route-line"></div>
-          <div class="packet" id="packet">
-            <span id="packetLabel">データ</span>
-          </div>
-          <div class="route-nodes">
-            <span>📱</span><span>📡</span><span>🌐</span><span>🖥️</span>
-          </div>
-        </div>
-
-        <div class="device">
-          <div class="device-icon">🖥️</div>
-          <strong>Webサーバー</strong>
-          <small>Webページを届ける！</small>
-        </div>
-      </div>
-
-      <div class="simulation-controls">
-        <button class="primary-btn" id="encapBtn">📦 カプセル化して送信</button>
-        <button class="secondary-btn" id="decapBtn">📤 受信してほどく</button>
-        <button class="ghost-btn" id="resetBtn">↺ リセット</button>
-      </div>
-
-      <div class="capsule-stack" id="capsuleStack">
-        <div class="capsule-item app-capsule">Webリクエスト <span>アプリケーション層</span></div>
-        <div class="capsule-item tcp-capsule">TCPヘッダ <span>トランスポート層</span></div>
-        <div class="capsule-item ip-capsule">IPヘッダ <span>インターネット層</span></div>
-        <div class="capsule-item signal-capsule">電気信号・電波 <span>ネットワークインターフェース層</span></div>
-      </div>
-      <p class="simulation-message" id="simulationMessage">「カプセル化して送信」を押すと、送り状が順番に追加されます。</p>
-    </section>
-
-    <section class="section quiz-section">
-      <div class="section-title">
-        <span class="eyebrow">06 / CHECK YOUR KNOWLEDGE</span>
-        <h2>3問クイズに挑戦！</h2>
-        <p>全部正解できるかな？</p>
-      </div>
-      <div class="quiz-card" id="quizCard">
-        <div class="quiz-top">
-          <span id="quizCount">Q1 / 3</span>
-          <div class="quiz-dots" id="quizDots"></div>
-        </div>
-        <h3 id="quizQuestion"></h3>
-        <div class="answers" id="answers"></div>
-        <div class="quiz-feedback" id="quizFeedback"></div>
-        <button class="next-btn" id="nextQuizBtn" disabled>次の問題 →</button>
-      </div>
-      <div class="score-card hidden" id="scoreCard">
-        <div class="score-emoji">🎉</div>
-        <h3>クイズ終了！</h3>
-        <p>あなたのスコア</p>
-        <div class="score-number"><span id="scoreNumber">0</span><small> / 3</small></div>
-        <p id="scoreMessage"></p>
-        <button class="primary-btn" id="retryBtn">もう一度挑戦</button>
-      </div>
-    </section>
-
-    <section class="section summary-section">
-      <div class="summary-card">
-        <div>
-          <span class="eyebrow">TAKEAWAY</span>
-          <h2>今日のポイント</h2>
-        </div>
-        <div class="takeaways">
-          <div><b>① プロトコル</b><span>通信するための「共通ルール」</span></div>
-          <div><b>② 階層</b><span>役割を分担して通信をシンプルにする仕組み</span></div>
-          <div><b>③ TCP/IP</b><span>インターネット通信を4つの階層で整理</span></div>
-          <div><b>④ カプセル化</b><span>送信時に各層の制御情報を付け加える</span></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>🌐 ネットワーク探検隊 — 情報Ⅰ「ネットワーク」学習アプリ</p>
-    <p class="footer-note">GitHub Pagesでそのまま公開できます。</p>
-  </footer>
-
-  <script src="script.js"></script>
+<section class="section summary">
+  <div class="summary-card">
+    <span>MISSION COMPLETE</span><h2>通信の正体は「役割分担」</h2>
+    <div class="takeaways">
+      <p><b>🤝 プロトコル</b>＝コンピューター同士の共通ルール</p>
+      <p><b>🧩 階層</b>＝通信の仕事を分担する仕組み</p>
+      <p><b>📦 カプセル化</b>＝各層の情報をデータに追加して送ること</p>
+      <p><b>📍 IP</b>＝宛先を指定して、目的地まで運ぶための仕組み</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>🌐 ネットワーク探検隊｜情報Ⅰ「ネットワーク」操作学習アプリ</footer>
+<script src="script.js"></script>
 </body>
 </html>

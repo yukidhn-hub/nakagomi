@@ -1,201 +1,71 @@
-const layerInfo = {
-  4: {
-    title: "4. アプリケーション層",
-    desc: "ユーザーが使うアプリケーションに合わせて、「どんな形式でデータをやり取りするか」を決める層です。",
-    examples: ["HTTP / HTTPS：Webページ", "DNS：ドメイン名をIPアドレスに変換", "SMTP / POP3：メールの送受信"],
-    analogy: "手紙の「本文」を書いたり、読んだりする段階。"
-  },
-  3: {
-    title: "3. トランスポート層",
-    desc: "データを相手に届けるとき、確実性や速さなどを調整します。代表的なのがTCPとUDPです。",
-    examples: ["TCP：順番や再送を確認して、確実に届ける", "UDP：確認を減らして、速さを重視する"],
-    analogy: "手紙が確実に届いたか、順番通りかをチェックする係。"
-  },
-  2: {
-    title: "2. インターネット層",
-    desc: "IPアドレスを使って、データを最終目的地まで運ぶための道筋（ルーティング）を考えます。",
-    examples: ["IP：宛先・送信元のIPアドレスを扱う", "ICMP：通信の診断などに使われる"],
-    analogy: "封筒に「宛先住所（IPアドレス）」を書く係。"
-  },
-  1: {
-    title: "1. ネットワークインターフェース層",
-    desc: "データを電気信号や電波などに変換し、同じネットワーク上の機器へ実際に届けます。",
-    examples: ["Ethernet：有線LAN", "Wi-Fi：無線LAN"],
-    analogy: "トラックや飛行機など、実際の運搬手段で荷物を運ぶ段階。"
-  }
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+
+$("#start").addEventListener("click",()=>$("#experiment").scrollIntoView({behavior:"smooth"}));
+
+const appText={
+ web:{protocol:"HTTP / HTTPS",label:"Webの「リクエスト」を作る"},
+ mail:{protocol:"SMTP / POP3",label:"メールの「本文」を送る"}
 };
+$$(".choice").forEach(b=>b.addEventListener("click",()=>{
+  $$(".choice").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");
+  const a=appText[b.dataset.app];$("#layer4").textContent=a.label;
+  $(".layer[data-layer='4'] mark").textContent=a.protocol.split(" ")[0];
+}));
 
-const layers = document.querySelectorAll(".layer-card");
-const detail = document.getElementById("layerDetail");
-
-layers.forEach(card => {
-  card.addEventListener("click", () => {
-    const info = layerInfo[card.dataset.layer];
-    layers.forEach(c => c.classList.remove("active"));
-    card.classList.add("active");
-    detail.innerHTML = `
-      <div class="detail-content">
-        <div>
-          <h3>${info.title}</h3>
-          <p>${info.desc}</p>
-        </div>
-        <div class="detail-example">
-          <b>代表例</b>
-          <ul>${info.examples.map(x => `<li>${x}</li>`).join("")}</ul>
-          <p><strong>📮 たとえると：</strong>${info.analogy}</p>
-        </div>
-      </div>
-    `;
-    updateProgress();
+const work={
+  4:{title:"アプリケーション層",body:"「何を話すか」のルールを担当。WebならHTTP/HTTPS、メールならSMTPなどを使います。",packet:["データ","HTTPリクエスト"],button:"データを作る"},
+  3:{title:"トランスポート層",body:"「どう届けるか」を担当。TCPは確実性、UDPは速さを重視します。",packet:["HTTPリクエスト","TCPヘッダ"],button:"TCPヘッダを付ける"},
+  2:{title:"インターネット層",body:"「どこへ届けるか」を担当。IPアドレスを使って目的地への道筋を考えます。",packet:["TCPヘッダ","IPヘッダ"],button:"IPヘッダを付ける"},
+  1:{title:"ネットワークインターフェース層",body:"「実際にどう送るか」を担当。Wi-FiやEthernetなどで電波・電気信号として送ります。",packet:["IPパケット","電波・電気信号"],button:"電波に変換する"}
+};
+let doneLayers=new Set();
+function showLayer(n){
+  const w=work[n]; const wb=$("#workbench");
+  wb.innerHTML=`<div class="action-box"><div class="work-icon">🧩</div><h3>${w.title}</h3><p>${w.body}</p><div class="mini-packet">${w.packet.map(x=>`<span>${x}</span>`).join("")}</div><button class="primary" id="layerAction">${doneLayers.has(n)?"✓ 完了！":w.button}</button></div>`;
+  $("#layerAction").addEventListener("click",()=>{
+    doneLayers.add(n); $("#layerAction").textContent="✓ 完了！";
+    wb.querySelector(".mini-packet").insertAdjacentHTML("beforeend",`<span>制御情報</span>`);
   });
-});
-
-const capsuleItems = [...document.querySelectorAll(".capsule-item")];
-const packet = document.getElementById("packet");
-const message = document.getElementById("simulationMessage");
-
-function showCapsules(count) {
-  capsuleItems.forEach((item, i) => item.classList.toggle("show", i < count));
 }
+$$(".layer").forEach(b=>b.addEventListener("click",()=>{
+  $$(".layer").forEach(x=>x.classList.remove("active"));b.classList.add("active");showLayer(Number(b.dataset.layer));
+}));
+showLayer(4);
 
-document.getElementById("encapBtn").addEventListener("click", () => {
-  showCapsules(4);
-  packet.classList.add("move");
-  document.getElementById("packetLabel").textContent = "📦";
-  message.textContent = "カプセル化完了！データに各層の情報が加わり、相手へ送信されます。";
-  updateProgress();
-});
-
-document.getElementById("decapBtn").addEventListener("click", () => {
-  packet.classList.remove("move");
-  showCapsules(0);
-  document.getElementById("packetLabel").textContent = "データ";
-  message.textContent = "非カプセル化！受信側では、下の層から順に制御情報を取り除きます。";
-  updateProgress();
-});
-
-document.getElementById("resetBtn").addEventListener("click", () => {
-  packet.classList.remove("move");
-  showCapsules(0);
-  document.getElementById("packetLabel").textContent = "データ";
-  message.textContent = "「カプセル化して送信」を押すと、送り状が順番に追加されます。";
-});
-
-const questions = [
-  {
-    q: "「プロトコル」の説明として最も適切なのはどれ？",
-    a: ["通信を行うための共通のルール", "パソコンの性能を測る数値", "Wi-Fiの電波を強くする装置", "Webページのデザイン"],
-    correct: 0,
-    explain: "その通り！プロトコルは、コンピューター同士が通信するための共通ルールです。"
-  },
-  {
-    q: "TCP/IPモデルで、IPアドレスを使って目的地までの道筋を考えるのはどの層？",
-    a: ["アプリケーション層", "トランスポート層", "インターネット層", "ネットワークインターフェース層"],
-    correct: 2,
-    explain: "正解！インターネット層ではIPを使って、目的地までデータを届ける役割を担います。"
-  },
-  {
-    q: "送信時、データに各層の制御情報を順番に付け加えていくことを何という？",
-    a: ["ルーティング", "カプセル化", "暗号化", "圧縮"],
-    correct: 1,
-    explain: "正解！送信側でヘッダなどを付け加えていくことを「カプセル化」といいます。"
-  }
+let capStep=0;
+const caps=[
+ ["Webリクエスト","アプリケーション層"],
+ ["TCPヘッダ","トランスポート層"],
+ ["IPヘッダ","インターネット層"],
+ ["電波・電気信号","ネットワークインターフェース層"]
 ];
-
-let quizIndex = 0;
-let score = 0;
-let answered = false;
-
-const quizQuestion = document.getElementById("quizQuestion");
-const answers = document.getElementById("answers");
-const quizFeedback = document.getElementById("quizFeedback");
-const nextBtn = document.getElementById("nextQuizBtn");
-const quizCount = document.getElementById("quizCount");
-const quizDots = document.getElementById("quizDots");
-
-function renderDots() {
-  quizDots.innerHTML = questions.map((_, i) =>
-    `<span class="${i < quizIndex ? "done" : i === quizIndex ? "active" : ""}"></span>`
-  ).join("");
+function renderCaps(){
+ $("#capsule").innerHTML=caps.map((x,i)=>`<div class="cap ${i<capStep?"show":""}">${x[0]} <small>${x[1]}</small></div>`).join("");
 }
-
-function loadQuiz() {
-  answered = false;
-  const item = questions[quizIndex];
-  quizCount.textContent = `Q${quizIndex + 1} / ${questions.length}`;
-  quizQuestion.textContent = item.q;
-  quizFeedback.textContent = "";
-  quizFeedback.className = "quiz-feedback";
-  nextBtn.disabled = true;
-  nextBtn.textContent = quizIndex === questions.length - 1 ? "結果を見る →" : "次の問題 →";
-  answers.innerHTML = item.a.map((text, i) =>
-    `<button class="answer-btn" data-index="${i}">${text}</button>`
-  ).join("");
-  answers.querySelectorAll(".answer-btn").forEach(btn => {
-    btn.addEventListener("click", () => answerQuiz(Number(btn.dataset.index)));
-  });
-  renderDots();
-}
-
-function answerQuiz(selected) {
-  if (answered) return;
-  answered = true;
-  const item = questions[quizIndex];
-  const btns = answers.querySelectorAll(".answer-btn");
-  btns.forEach(b => b.disabled = true);
-  btns[item.correct].classList.add("correct");
-  if (selected === item.correct) {
-    score++;
-    quizFeedback.textContent = "⭕ " + item.explain;
-    quizFeedback.classList.add("good");
-  } else {
-    btns[selected].classList.add("wrong");
-    quizFeedback.textContent = `❌ おしい！正解は「${item.a[item.correct]}」。${item.explain}`;
-    quizFeedback.classList.add("bad");
-  }
-  nextBtn.disabled = false;
-  updateProgress();
-}
-
-nextBtn.addEventListener("click", () => {
-  if (!answered) return;
-  quizIndex++;
-  if (quizIndex >= questions.length) {
-    document.getElementById("quizCard").classList.add("hidden");
-    document.getElementById("scoreCard").classList.remove("hidden");
-    document.getElementById("scoreNumber").textContent = score;
-    const scoreMessage = document.getElementById("scoreMessage");
-    scoreMessage.textContent =
-      score === 3 ? "全問正解！ネットワーク探検、ばっちりです！" :
-      score === 2 ? "あと一歩！間違えた問題をもう一度見直してみよう。" :
-      "まずは基本をもう一度確認してみよう。焦らなくてOK！";
-    document.getElementById("quizCount").textContent = "COMPLETE";
-  } else {
-    loadQuiz();
-  }
+renderCaps();
+$("#encap").addEventListener("click",()=>{
+ if(capStep<4){capStep++;renderCaps();$("#status").textContent=capStep<4?`📦 ${caps[capStep-1][0]}を追加！さらに下の層へ渡します。`:"🎉 カプセル化完了！全部の情報がそろいました。";}
+ else $("#status").textContent="全部そろっています。「送信する」で実際に動かしてみよう。";
 });
-
-document.getElementById("retryBtn").addEventListener("click", () => {
-  quizIndex = 0;
-  score = 0;
-  document.getElementById("scoreCard").classList.add("hidden");
-  document.getElementById("quizCard").classList.remove("hidden");
-  loadQuiz();
-  updateProgress();
+$("#send").addEventListener("click",()=>{
+ if(capStep<4){$("#status").textContent="先に4枚の情報をそろえよう。";return}
+ $("#movingPacket").classList.add("go");$("#status").textContent="🚀 送信中！パケットがネットワークを進んでいます。";
 });
+$("#reset").addEventListener("click",()=>{capStep=0;renderCaps();$("#movingPacket").classList.remove("go");$("#status").textContent="アプリケーションデータができました。「1枚追加する」を押してみよう。";});
 
-document.getElementById("startBtn").addEventListener("click", () => {
-  document.getElementById("start").scrollIntoView({ behavior: "smooth" });
-});
-
-function updateProgress() {
-  const layerDone = document.querySelector(".layer-card.active") ? 1 : 0;
-  const simulationDone = capsuleItems.some(x => x.classList.contains("show")) ? 1 : 0;
-  const quizDone = quizIndex >= questions.length ? 1 : 0;
-  const percent = Math.min(100, Math.round(((layerDone + simulationDone + quizDone) / 3) * 100));
-  document.getElementById("progressBar").style.width = percent + "%";
-  document.getElementById("progressText").textContent = `学習 ${percent}%`;
+function proto(type){
+ const tcp=type==="tcp";$("#reliability").style.width=tcp?"92%":"48%";$("#speed").style.width=tcp?"62%":"94%";
+ const d=$("#delivery");d.innerHTML=Array.from({length:6},(_,i)=>`<i class="${tcp||i!==2?"ok":""}"></i>`).join("");
+ $("#protoText").innerHTML=tcp?"<b>TCP：</b>届いたか・順番は正しいかを確認し、必要なら再送します。Web閲覧など「正確さ」が大切な通信で使われます。":"<b>UDP：</b>確認を減らして速さを優先します。リアルタイム性が大切な通信などで使われます。";
 }
+$$(".proto").forEach(b=>b.addEventListener("click",()=>{$$(".proto").forEach(x=>x.classList.remove("active"));b.classList.add("active");proto(b.dataset.proto)}));
+proto("tcp");
 
-loadQuiz();
-updateProgress();
+let route=0;
+$("#routeBtn").addEventListener("click",()=>{
+ const cards=$$(".route-map .device,.route-map .router");
+ cards.forEach(x=>x.classList.remove("active-route"));
+ if(route<cards.length-1)route++;
+ cards[route].classList.add("active-route");
+ $("#routeStatus").textContent=route===cards.length-1?"🎯 到着！IPアドレスを手がかりに、目的地まで進みました。":`📡 ルーターが宛先を見て、次の道へ送りました（${route}/3）。`;
+});
